@@ -1,0 +1,169 @@
+name: AI PR Review
+
+# Uses GitHub Models (free in Actions) to auto-review every PR against main.
+# Flags blocking issues, suggestions, and nits. Posts a single summary
+# comment per PR and updates it on subsequent commits.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  models: read
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: |
+      github.event.pull_request.draft == false &&
+      github.actor != 'dependabot[bot]' &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-review')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gather diff
+        id: context
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=50 origin "$BASE_REF"
+          # Cap diff at 20 KB (~5000 tokens) to fit in gpt-4o's 8000-token input budget
+          DIFF=$(git diff "origin/${BASE_REF}...${HEAD_SHA}" | head -c 20000)
+          CHANGED=$(git diff --name-only "origin/${BASE_REF}...${HEAD_SHA}")
+          {
+            echo "diff<<DIFFEOF"
+            echo "$DIFF"
+            echo "DIFFEOF"
+            echo "changed<<CHGEOF"
+            echo "$CHANGED"
+            echo "CHGEOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run AI review
+        id: ai
+        uses: actions/ai-inference@v2
+        with:
+          # gpt-4o gives 8000 input tokens (vs 4000 for gpt-5/o3/o4-mini) on the
+          # GitHub Models free tier — best fit for PR review where context matters.
+          model: openai/gpt-4o
+          max-completion-tokens: 2000
+          system-prompt: |
+            You are reviewing a PR on the MoSPI MCP server: a FastMCP 3.0
+            server exposing 23 Indian govt statistical datasets over the
+            Model Context Protocol. Single-file server (mospi_server.py).
+            Swagger YAMLs are the source of truth for parameter validation.
+
+            ## Project rules — flag any violation
+
+            **Dataset wiring** — adding a dataset requires updates in ALL of:
+            swagger/swagger_user_<name>.yaml; mospi/client.py (api_endpoints,
+            get_<n>_indicators, get_<n>_filters); mospi_server.py
+            (VALID_DATASETS, DATASET_SWAGGER, DATASETS_REQUIRING_INDICATOR,
+            indicator_methods dict, get_metadata branch, dataset_map in
+            get_data, list_datasets entry, total_datasets count, banner log,
+            docstrings); tests/test_mcp_server.py (DATASETS pytest.param,
+            EXPECTED_DATASETS); README.md, CONTRIBUTING.md, CHANGELOG.md
+            (dataset count + lists).
+
+            **Param renames** done in get_data (caller sends indicator_code):
+            RBI -> sub_indicator_code; MNRE -> type_of_renewable_energy_code;
+            NSS80 also needs survey_code auto-derived (1-20=CMST, 23-42=CMSE).
+
+            **Pitfalls**:
+            - Dataset count drift across files
+            - nginx CSP value MUST be one physical line (newline = HTTP corruption)
+            - nginx add_header in a child location silently drops server-level headers
+            - FastMCP doesn't enforce type hints; use _safe_int() for numeric params
+            - CPI tests pin base_year=2012 due to upstream 2024 regression
+            - Don't replace LegacyRenegotiationAdapter (MoSPI needs legacy TLS)
+            - --stateless flag in Dockerfile CMD is required for ChatGPT
+
+            ## Severity
+            - **BLOCKING** — correctness, broken wiring, missing critical
+              piece, security risk
+            - **SUGGESTION** — nice-to-have
+            - **NIT** — stylistic (use sparingly)
+
+            ## Don't flag
+            - Linter-style formatting
+            - Splitting mospi_server.py (single-file is intentional)
+            - Adding type-hint enforcement
+            - Removing 'unsafe-inline' from CSP (accepted in KPMG VA)
+
+            ## Output (Markdown)
+
+            ## Summary
+            One sentence: what the PR does + verdict.
+
+            ## Findings
+            - **[BLOCKING/SUGGESTION/NIT]** `path:line` — issue. Why it
+              matters (1 sentence). Suggested fix (1 line).
+
+            ## Verdict
+            - Blocking: N
+            - Suggestion: N
+            - Nit: N
+            - Recommendation: Approve / Request Changes / Comment
+            - One-sentence rationale.
+
+            If no findings, say so and recommend Approve.
+          prompt: |
+            Title: ${{ github.event.pull_request.title }}
+
+            Description:
+            ${{ github.event.pull_request.body }}
+
+            Changed files:
+            ${{ steps.context.outputs.changed }}
+
+            Diff:
+            ```diff
+            ${{ steps.context.outputs.diff }}
+            ```
+
+      - name: Post or update review comment
+        uses: actions/github-script@v7
+        env:
+          REVIEW: ${{ steps.ai.outputs.response }}
+        with:
+          script: |
+            const marker = '<!-- ai-pr-review -->';
+            const body = `${marker}\n## 🤖 AI PR Review\n\n${process.env.REVIEW}\n\n---\n_Auto-generated by [GitHub Models](https://docs.github.com/en/github-models) (openai/gpt-4o) via \`.github/workflows/ai-review.yml\`. Add the \`skip-review\` label to suppress._`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.startsWith(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
