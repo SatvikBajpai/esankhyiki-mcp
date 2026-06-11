@@ -83,6 +83,7 @@ class MoSPI:
             "NSS79": "/api/nss-79/getNSS79Records",
             "NSS80": "/api/nss-80/getNSS80Records",
             "NSS76": "/api/nss-76/getNss76Records",
+            "NSS75E": "/api/nss-75/getNSS75Records",
             "CPIALRL": "/api/cpialrl/getCpialrlRecords",
             "HCES": "/api/hces/getHcesRecords",
             "TUS": "/api/tus/getTusRecords",
@@ -985,6 +986,75 @@ class MoSPI:
         try:
             response = self.session.get(
                 f"{self.base_url}/api/nss-76/getNSS76FilterByIndicatorId",
+                params=params,
+                timeout=30,
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            return {"error": str(e), "statusCode": False}
+
+    # =========================================================================
+    # NSS75E (NSS 75th Round - Education / Social Consumption on Education) Methods
+    # =========================================================================
+    @staticmethod
+    def _nss75e_survey_for(indicator_code: int) -> Optional[int]:
+        """
+        Map NSS75E indicator_code to survey_code.
+
+        Education module (survey_code=2): indicators 43-55.
+        """
+        if 43 <= indicator_code <= 55:
+            return 2
+        return None
+
+    def get_nss75e_indicators(self) -> Dict[str, Any]:
+        """Fetch list of NSS75E indicators from MoSPI API.
+
+        Returns 13 education indicators from NSS 75th Round (survey_code=2):
+        literacy, educational attainment, attendance ratios (GAR/NAR),
+        course type distribution, student expenditure, and household digital access.
+        """
+        try:
+            response = self.session.get(
+                f"{self.base_url}/api/nss-75/getIndicatorList",
+                params={"survey_code": 2},
+                timeout=30,
+            )
+            response.raise_for_status()
+            result = response.json()
+            result["count"] = len(result.get("data", []))
+            result["_note"] = (
+                "survey_code=2 (Education module): indicators 43-55. "
+                "Pass survey_code in get_metadata/get_data or rely on auto-derivation."
+            )
+            return result
+        except requests.RequestException as e:
+            return {"error": str(e), "statusCode": False}
+
+    def get_nss75e_filters(self, indicator_code: int, survey_code: Optional[int] = None) -> Dict[str, Any]:
+        """Fetch available NSS75E filters for given indicator.
+
+        Args:
+            indicator_code: Indicator code (43-55).
+            survey_code: Education module code (always 2). Auto-derived if omitted.
+        """
+        if survey_code is None:
+            survey_code = self._nss75e_survey_for(indicator_code)
+            if survey_code is None:
+                return {
+                    "error": (
+                        f"Invalid indicator_code {indicator_code}. "
+                        "Valid range for NSS75E: 43-55 (Education module)."
+                    ),
+                    "statusCode": False,
+                }
+
+        params = {"indicator_code": indicator_code, "survey_code": survey_code}
+
+        try:
+            response = self.session.get(
+                f"{self.base_url}/api/nss-75/getNSS75FilterByIndicatorId",
                 params=params,
                 timeout=30,
             )
