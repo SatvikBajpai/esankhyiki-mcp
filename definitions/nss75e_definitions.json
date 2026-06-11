@@ -1,0 +1,67 @@
+[
+  {
+    "indicator_code": 43,
+    "name": "Literacy rate (in per cent) among persons of age 7 years and above for different States",
+    "description": "Literacy rate (in per cent) among persons of age 7 years and above for different States"
+  },
+  {
+    "indicator_code": 44,
+    "name": "Percentage distribution of persons of age 15 years and above by highest level of education successfully completed for different States",
+    "description": "Percentage distribution of persons of age 15 years and above by highest level of education successfully completed for different States"
+  },
+  {
+    "indicator_code": 45,
+    "name": "Average number of years completed in formal education among persons of age 15 years and above for different States",
+    "description": "Average number of years completed in formal education among persons of age 15 years and above for different States"
+  },
+  {
+    "indicator_code": 46,
+    "name": "Average number of years completed in formal education among persons of age 25 years and above for different States",
+    "description": "Average number of years completed in formal education among persons of age 25 years and above for different States"
+  },
+  {
+    "indicator_code": 47,
+    "name": "Percentage distribution of students (persons of age 3 to 35 years currently attending education) by level of current attendance for different States",
+    "description": "Percentage distribution of students (persons of age 3 to 35 years currently attending education) by level of current attendance for different States"
+  },
+  {
+    "indicator_code": 48,
+    "name": "Gross Attendance Ratio (GAR) at different levels of education for different States",
+    "description": "Gross Attendance Ratio (GAR) at different levels of education for different States"
+  },
+  {
+    "indicator_code": 49,
+    "name": "Net Attendance Ratio (NAR) at different levels of education for different States",
+    "description": "Net Attendance Ratio (NAR) at different levels of education for different States"
+  },
+  {
+    "indicator_code": 50,
+    "name": "Percentage distribution of students by type of course pursuing (general course and technical/ professional course) for different States",
+    "description": "Percentage distribution of students by type of course pursuing (general course and technical/ professional course) for different States"
+  },
+  {
+    "indicator_code": 51,
+    "name": "Average expenditure (Rs.) per student in basic course in the current academic year by type of course pursuing (general course and technical/ professional course) for different States",
+    "description": "Average expenditure (Rs.) per student in basic course in the current academic year by type of course pursuing (general course and technical/ professional course) for different States"
+  },
+  {
+    "indicator_code": 52,
+    "name": "Average expenditure (Rs.) on basic course per student during current academic year pursuing general course by items of expenditure for different States.",
+    "description": "Average expenditure (Rs.) on basic course per student during current academic year pursuing general course by items of expenditure for different States."
+  },
+  {
+    "indicator_code": 53,
+    "name": "Average expenditure (Rs.) on basic course per student during current academic year pursuing technical/professional course by items of expenditure for different States",
+    "description": "Average expenditure (Rs.) on basic course per student during current academic year pursuing technical/professional course by items of expenditure for different States"
+  },
+  {
+    "indicator_code": 54,
+    "name": "Average expenditure (Rs.) on basic course per student during current academic year any course by items of expenditure for different States",
+    "description": "Average expenditure (Rs.) on basic course per student during current academic year any course by items of expenditure for different States"
+  },
+  {
+    "indicator_code": 55,
+    "name": "Percentage of households with computer and internet facility for different States",
+    "description": "Percentage of households with computer and internet facility for different States"
+  }
+]
