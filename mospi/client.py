@@ -1658,5 +1658,32 @@ class MoSPI:
             return {"error": str(e), "statusCode": False}
 
 
+
+    def get_nss81_indicators(self) -> Dict[str, Any]:
+        """Fetch NSS81 indicators."""
+        try:
+            response = self.session.get(
+                f"{self.base_url}/api/nss-81/getIndicators",
+                timeout=30,
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            return {"error": str(e), "statusCode": False}
+
+    def get_nss81_filters(self, indicator_code: int, **kwargs) -> Dict[str, Any]:
+        """Fetch NSS81 filters for a given indicator."""
+        params = {"indicator_code": indicator_code, **kwargs}
+        try:
+            response = self.session.get(
+                f"{self.base_url}/api/nss-81/getFilterByIndicatorId",
+                params=params,
+                timeout=30,
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            return {"error": str(e), "statusCode": False}
+
 # Global instance
 mospi = MoSPI()
