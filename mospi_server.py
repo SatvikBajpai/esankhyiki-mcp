@@ -85,7 +85,7 @@ VALID_DATASETS = [
 
 # Datasets temporarily out of service. The tools reject these; all other
 # wiring (swagger, methods, metadata) stays intact, so re-enabling is one line.
-DISABLED_DATASETS = {"MNRE"}
+DISABLED_DATASETS = set()
 
 # Maps dataset key -> (swagger_yaml_file, endpoint_path)
 # Swagger YAMLs are the single source of truth for valid API parameters.
