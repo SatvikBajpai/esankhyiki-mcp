@@ -1,0 +1,12 @@
+openapi: 3.0.0
+paths:
+  /api/nss-81/getNSS81Records:
+    get:
+      parameters:
+        - in: query
+          name: indicator_code
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }

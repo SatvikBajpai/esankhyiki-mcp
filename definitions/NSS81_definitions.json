@@ -1,0 +1,58 @@
+{
+  "dataset": "NSS81",
+  "name": "NSS 81st Round (Modular Survey)",
+  "description": "Comprehensive annual modular survey with 10 indicators on household consumption and digital access.",
+  "domain": "Households",
+  "indicators": [
+    {
+      "code": 1,
+      "name": "Household Monthly Per Capita Consumption Expenditure (MPCE)",
+      "description": "Average monthly per capita consumption expenditure for rural and urban households."
+    },
+    {
+      "code": 2,
+      "name": "Food Consumption Expenditure",
+      "description": "Share of food expenditure in total household consumption expenditure."
+    },
+    {
+      "code": 3,
+      "name": "Non-Food Consumption Expenditure",
+      "description": "Share of non-food expenditure in total household consumption expenditure."
+    },
+    {
+      "code": 4,
+      "name": "Access to Improved Drinking Water",
+      "description": "Percentage of households with access to improved drinking water sources."
+    },
+    {
+      "code": 5,
+      "name": "Access to Improved Sanitation",
+      "description": "Percentage of households with access to improved sanitation facilities."
+    },
+    {
+      "code": 6,
+      "name": "Household Electrification",
+      "description": "Percentage of households with access to electricity."
+    },
+    {
+      "code": 7,
+      "name": "Internet Access in Households",
+      "description": "Percentage of households with internet access."
+    },
+    {
+      "code": 8,
+      "name": "Mobile Phone Ownership",
+      "description": "Percentage of households owning at least one mobile phone."
+    },
+    {
+      "code": 9,
+      "name": "Digital Payment Usage",
+      "description": "Percentage of households using digital payment methods."
+    },
+    {
+      "code": 10,
+      "name": "Poverty Headcount Ratio",
+      "description": "Percentage of population below the poverty line based on consumption expenditure."
+    }
+  ]
+}
