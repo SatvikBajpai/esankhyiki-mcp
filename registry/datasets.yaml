@@ -305,7 +305,7 @@ datasets:
     filter_endpoint: null
     requires_indicator: true
     profile: bespoke
-    enabled: true
+    enabled: false
     transforms:
       - Bespoke dataset. indicator_code 1=EC6, 2=EC5, 3=EC4 maps to versioned swagger paths and upstream endpoints (filterDistrict6/5/4 for ranking, submitForm6/5/4 for detail). Indicators come from a hardcoded list and filters are read from swagger_user_ec.yaml rather than an /api endpoint. data_endpoint /EC/filterDistrict6 is the ranking endpoint for EC6.
   - code: UDISE
