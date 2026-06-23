@@ -83,6 +83,10 @@ VALID_DATASETS = [
     "NSS77", "NSS78", "NSS76", "NSS75E", "NSS79", "CPIALRL", "HCES", "TUS", "EC", "UDISE", "MNRE", "NSS80"
 ]
 
+# Datasets temporarily out of service. The tools reject these; all other
+# wiring (swagger, methods, metadata) stays intact, so re-enabling is one line.
+DISABLED_DATASETS = set()
+
 # Maps dataset key -> (swagger_yaml_file, endpoint_path)
 # Swagger YAMLs are the single source of truth for valid API parameters.
 DATASET_SWAGGER = {
@@ -266,6 +270,8 @@ def get_indicators(
         by frequency_code.
     """
     dataset = dataset.upper()
+    if dataset in DISABLED_DATASETS:
+        return {"error": f"Dataset {dataset} is temporarily disabled."}
 
     frequency_code, err = _safe_int(frequency_code, "frequency_code")
     if err:
@@ -372,6 +378,8 @@ def get_metadata(
         parameter documentation.
     """
     dataset = dataset.upper()
+    if dataset in DISABLED_DATASETS:
+        return {"error": f"Dataset {dataset} is temporarily disabled."}
 
     # Validate numeric params — FastMCP doesn't enforce type hints
     indicator_code, err = _safe_int(indicator_code, "indicator_code")
@@ -707,6 +715,8 @@ def get_data(dataset: str, filters: Dict[str, Any]) -> dict:
         if parameters are invalid.
     """
     dataset = dataset.upper()
+    if dataset in DISABLED_DATASETS:
+        return {"error": f"Dataset {dataset} is temporarily disabled."}
 
     # EC uses a completely different API (POST to esankhyiki.mospi.gov.in)
     if dataset == "EC":
