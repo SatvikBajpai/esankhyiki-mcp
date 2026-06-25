@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: NSS81 API
+  version: 1.0.0
+paths:
+  /api/nss-81/getNSS81Records:
+    get:
+      summary: NSS81 records
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: indicator_code
+          required: true
+          schema: { type: integer }
+          description: Indicator code (1-29)
+        - in: query
+          name: state_code
+          schema: { type: integer }
+          description: State / UT code
+        - in: query
+          name: sector_code
+          schema: { type: integer }
+          description: Sector (1=Rural, 2=Urban, 3=Combined)
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: Format
+          schema: { type: string, enum: [JSON, CSV], default: JSON }
