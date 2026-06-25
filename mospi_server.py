@@ -81,6 +81,7 @@ VALID_DATASETS = [
     "PLFS", "CPI", "IIP", "ASI", "NAS", "WPI", "ENERGY",
     "AISHE", "ASUSE", "GENDER", "NFHS", "ENVSTATS", "RBI",
     "NSS77", "NSS78", "NSS76", "NSS75E", "NSS79", "CPIALRL", "HCES", "TUS", "EC", "UDISE", "MNRE", "NSS80"
+    "NSS81",
 ]
 
 # Datasets temporarily out of service. The tools reject these; all other
@@ -117,12 +118,14 @@ DATASET_SWAGGER = {
     "NSS80": ("swagger_user_nss80.yaml", "/api/nss-80/getNSS80Records"),
     "NSS76": ("swagger_user_nss76.yaml", "/api/nss-76/getNss76Records"),
     "NSS75E": ("swagger_user_nss75e.yaml", "/api/nss-75/getNSS75Records"),
+    "NSS81": ("swagger_user_nss81.yaml", "/api/nss-81/getNSS81Records"),
 }
 
 # Datasets that require indicator_code in get_data
 DATASETS_REQUIRING_INDICATOR = [
     "PLFS", "NAS", "ENERGY", "AISHE", "ASUSE", "GENDER", "NFHS", "ENVSTATS",
     "NSS77", "NSS78", "NSS76", "NSS75E", "NSS79", "CPIALRL", "HCES", "TUS", "EC", "UDISE", "MNRE", "NSS80"
+    "NSS81",
 ]
 
 
@@ -304,6 +307,7 @@ def get_indicators(
         "IIP": mospi.get_iip_base_years,
         "WPI": mospi.get_wpi_base_years,
         "ASI": mospi.get_asi_indicators,
+        "NSS81": mospi.get_nss81_indicators,
     }
 
     if dataset not in indicator_methods:
@@ -675,6 +679,18 @@ def get_metadata(
             result["next_step"] = _next
             return _check_empty_metadata(result, dataset, indicator_code=indicator_code, survey_code=survey_code)
 
+        elif dataset == "NSS81":
+            if indicator_code is None:
+                return {"error": "indicator_code is required for NSS81. Range: 1-29."}
+            result = mospi.get_nss81_filters(indicator_code=indicator_code)
+            result["api_params"] = get_swagger_param_definitions("NSS81")
+            result["parameter_notes"] = (
+                "indicator_code is required. Range 1-29. "
+                "state_code, sector_code, and limit are optional filters. "
+                "survey_code is not required for NSS81."
+            )
+            result["next_step"] = _next
+            return _check_empty_metadata(result, dataset, indicator_code=indicator_code)
         else:
             return {"error": f"Unknown dataset: {dataset}", "valid_datasets": VALID_DATASETS}
 
@@ -869,7 +885,7 @@ def list_datasets() -> dict:
         and 'workflow' (the four-step sequence).
     """
     return {
-        "total_datasets": 25,
+        "total_datasets": 26,
         "datasets": {
             "PLFS": {
                 "name": "Periodic Labour Force Survey",
@@ -996,6 +1012,11 @@ def list_datasets() -> dict:
                 "description": "38 indicators from two modules of NSS 80th Round. Telecom (CMST) module (Comprehensive Modular Survey: Telecom, indicators 1-20): mobile phone ownership and usage in last 3 months, internet usage and frequency, type of portable device and network used, ability to send/receive email and attachments, ability to copy-paste, create electronic documents and presentations, online banking ability and modes of transaction, ability to report cybercrime, household possession of landline/mobile/optical fiber, household internet facility by service type, reasons for not having internet, and household online purchases by type of goods. Education (CMSE) module (Comprehensive Modular Survey: Education, indicators 23-42): covers student enrolment patterns, type of school and level of enrolment, expenditure on school education including course fees, books, uniforms, transport and other related expenses, participation in private coaching and associated expenditure, household spending on education, sources of funding for educational expenses, distribution of students across education categories, and household support for school education.",
                 "use_for": "Mobile phone usage, internet access, digital literacy, online banking, cybercrime awareness, e-commerce participation, school enrolment, education expenditure, private coaching, household telecom connectivity, online shopping, school expenditure, course fees, books, uniforms, transport, private tuition, education expenditure by household, CMST survey, CMSE survey, comprehensive modular survey, household support for education"
 },
+            "NSS81": {
+                "name": "NSS 81st Round — Comprehensive Annual Modular Survey",
+                "description": "Annual modular survey covering employment, education and health access indicators.",
+                "use_for": "Annual modular indicators, employment, education, health access",
+            },
         },
         "workflow": [
             "1. list_datasets() — identify the relevant dataset",
